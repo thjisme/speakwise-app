@@ -12,6 +12,7 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({ words, onGenerateExa
     const [examples, setExamples] = useState<ExampleSentence[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [copyButtonText, setCopyButtonText] = useState('Export for Sheets');
 
     useEffect(() => {
         const fetchExamples = async () => {
@@ -37,6 +38,18 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({ words, onGenerateExa
     const getWordFeedback = (word: string) => {
         return words.find(w => w.word.toLowerCase() === word.toLowerCase())?.pronunciation_feedback;
     }
+
+    const handleExport = () => {
+        const wordsToExport = words.map(w => w.word).join('\n');
+        navigator.clipboard.writeText(wordsToExport).then(() => {
+            setCopyButtonText('Copied!');
+            setTimeout(() => setCopyButtonText('Export for Sheets'), 2000);
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+            setCopyButtonText('Error!');
+            setTimeout(() => setCopyButtonText('Export for Sheets'), 2000);
+        });
+    };
 
     return (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-fade-in">
@@ -64,6 +77,16 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({ words, onGenerateExa
                         </ul>
                     )}
                 </div>
+                 {words.length > 0 && !loading && !error && (
+                    <div className="pt-4 mt-4 border-t border-[var(--border-color)]">
+                        <button
+                            onClick={handleExport}
+                            className="w-full px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md transition-colors"
+                        >
+                            {copyButtonText}
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

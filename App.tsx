@@ -22,7 +22,6 @@ const App: React.FC = () => {
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState<string | null>(() => localStorage.getItem('user-api-key'));
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('theme') as Theme) || 'dark');
-  const [googleSheetId, setGoogleSheetId] = useState<string>(() => localStorage.getItem('google-sheet-id') || '');
   const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
@@ -39,10 +38,11 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSetGoogleSheetId = (id: string) => {
-    setGoogleSheetId(id);
-    localStorage.setItem('google-sheet-id', id);
-  }
+  const handleClearAll = () => {
+    setScript('');
+    setArticleTitle('');
+    setArticleLink('');
+  };
 
   const handleAudioReady = useCallback(async (audioData: { data: string; mimeType: string }) => {
     if (!script.trim()) {
@@ -102,8 +102,6 @@ const App: React.FC = () => {
         return <Settings 
             currentTheme={theme}
             onSetTheme={setTheme}
-            googleSheetId={googleSheetId}
-            onSetGoogleSheetId={handleSetGoogleSheetId}
             apiKey={apiKey}
             onSetApiKey={handleSetApiKey}
             onClose={() => setShowSettings(false)}
@@ -121,7 +119,6 @@ const App: React.FC = () => {
                 script={script}
                 onReset={resetState}
                 onGenerateExamples={handleGenerateExamples}
-                googleSheetId={googleSheetId}
                 theme={theme}
             />
         );
@@ -163,7 +160,7 @@ const App: React.FC = () => {
                     className="w-full p-3 bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] transition-colors duration-300"
                 />
             </div>
-            <ScriptInput value={script} onChange={setScript} />
+            <ScriptInput value={script} onChange={setScript} onClearAll={handleClearAll} />
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <button
                 onClick={() => setStatus('recording')}

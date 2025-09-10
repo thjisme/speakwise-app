@@ -6,14 +6,12 @@ import { CloseIcon } from './icons/CloseIcon.tsx';
 interface SettingsProps {
   currentTheme: Theme;
   onSetTheme: (theme: Theme) => void;
-  googleSheetId: string;
-  onSetGoogleSheetId: (id: string) => void;
   apiKey: string;
   onSetApiKey: (key: string) => void;
   onClose: () => void;
 }
 
-export const Settings: React.FC<SettingsProps> = ({ currentTheme, onSetTheme, googleSheetId, onSetGoogleSheetId, apiKey, onSetApiKey, onClose }) => {
+export const Settings: React.FC<SettingsProps> = ({ currentTheme, onSetTheme, apiKey, onSetApiKey, onClose }) => {
   return (
     <div className="w-full max-w-2xl p-6 sm:p-8 bg-[var(--bg-secondary)] rounded-2xl shadow-xl relative animate-fade-in space-y-8">
       <div className="flex justify-between items-center">
@@ -39,21 +37,6 @@ export const Settings: React.FC<SettingsProps> = ({ currentTheme, onSetTheme, go
             Dark
           </button>
         </div>
-      </div>
-
-      {/* Google Sheets Integration */}
-      <div className="border-t border-[var(--border-color)] pt-6">
-        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Google Sheets Integration</h3>
-        <p className="text-sm text-[var(--text-muted)] mb-3">
-          Enter a Google Sheet ID to save challenging words. <strong className="text-yellow-500 font-normal">(Note: This feature is a demo and not yet functional as it requires server-side authentication.)</strong>
-        </p>
-        <input
-          type="text"
-          value={googleSheetId}
-          onChange={(e) => onSetGoogleSheetId(e.target.value)}
-          placeholder="Enter Google Sheet ID"
-          className="w-full p-3 bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] transition-colors duration-300"
-        />
       </div>
     </div>
   );

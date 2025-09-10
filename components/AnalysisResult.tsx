@@ -13,7 +13,6 @@ interface AnalysisResultProps {
   script: string;
   onReset: () => void;
   onGenerateExamples: (words: string[]) => Promise<ExampleSentence[]>;
-  googleSheetId: string;
   theme: 'light' | 'dark';
 }
 
@@ -43,7 +42,7 @@ const FluencyStar: React.FC<{ filled: boolean }> = ({ filled }) => (
     </svg>
 );
 
-export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL, script, onReset, onGenerateExamples, googleSheetId, theme }) => {
+export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL, script, onReset, onGenerateExamples, theme }) => {
   const fullScript = result.word_by_word_feedback.map(w => w.word).join(' ');
   const { isPlaying, isPaused, rate, play, pause, resume, stop, setRate, speak: speakWord } = useTTS();
   const [showSummary, setShowSummary] = useState(false);
@@ -62,14 +61,6 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
 
   const handlePlayPause = () => (isPlaying ? (isPaused ? resume() : pause()) : play(fullScript));
   const changeRate = (delta: number) => setRate(rate + delta);
-
-  const handleAddToSheet = () => {
-    if (!googleSheetId) {
-        alert("Please set your Google Sheet ID in the Settings panel first.");
-        return;
-    }
-    alert(`Feature in Development\n\nGoogle Sheets integration requires server-side authentication and is not yet implemented in this frontend-only application.\n\nIf it were active, this would add your challenging words to the specified sheet.`);
-  }
 
   return (
     <>
@@ -159,20 +150,12 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
       {/* Action Buttons */}
        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4 border-t border-[var(--border-color)]">
           {challengingWords.length > 0 && (
-              <>
-                <button
-                  onClick={() => setShowSummary(true)}
-                  className="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg shadow-md transition-colors"
-                >
-                  Summarize Challenging Words ({challengingWords.length})
-                </button>
-                 <button
-                  onClick={handleAddToSheet}
-                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md transition-colors"
-                >
-                  Add to Vocab Sheet
-                </button>
-              </>
+              <button
+                onClick={() => setShowSummary(true)}
+                className="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg shadow-md transition-colors"
+              >
+                Summarize Challenging Words ({challengingWords.length})
+              </button>
           )}
         <button
           onClick={onReset}

@@ -8,6 +8,7 @@ export const useAudioRecorder = () => {
   const [error, setError] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const startRecording = useCallback(async () => {
     setStatus('inactive');
@@ -18,6 +19,7 @@ export const useAudioRecorder = () => {
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
       setStatus('recording');
       mediaRecorderRef.current = new MediaRecorder(stream);
 
@@ -39,6 +41,7 @@ export const useAudioRecorder = () => {
           setStatus('stopped');
           // Stop all tracks on the stream
           stream.getTracks().forEach(track => track.stop());
+          streamRef.current = null;
           resolve({ blob: audioBlob, mimeType });
         };
         mediaRecorderRef.current!.onerror = (event) => {
@@ -71,5 +74,20 @@ export const useAudioRecorder = () => {
     }
   }, [status]);
   
-  return { status, error, startRecording, stopRecording };
+  const cancelRecording = useCallback(() => {
+    if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.onstop = null; // Prevent onstop from firing
+        if (mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+        }
+    }
+    if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+    }
+    audioChunksRef.current = [];
+    setStatus('inactive');
+  }, []);
+
+  return { status, error, startRecording, stopRecording, cancelRecording };
 };

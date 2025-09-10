@@ -11,7 +11,7 @@ interface AudioRecorderProps {
 const MAX_DURATION_SECONDS = 300; // 5 minutes
 
 export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordingComplete, onCancel }) => {
-  const { status, error, startRecording, stopRecording } = useAudioRecorder();
+  const { status, error, startRecording, stopRecording, cancelRecording } = useAudioRecorder();
   const [duration, setDuration] = useState(0);
   const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -32,6 +32,16 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordingComplet
   const handleStop = useCallback(() => {
     stopRecording();
   }, [stopRecording]);
+
+  const handleRetry = useCallback(() => {
+    cancelRecording();
+    handleStart();
+  }, [cancelRecording, handleStart]);
+
+  const handleCancel = useCallback(() => {
+    cancelRecording();
+    onCancel();
+  }, [cancelRecording, onCancel]);
 
   useEffect(() => {
     if (status === 'recording') {
@@ -88,12 +98,17 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordingComplet
             Start Recording
           </button>
         ) : (
-          <button onClick={handleStop} className="flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-lg shadow-lg transition-all transform hover:scale-105">
-            <StopIcon />
-            Stop Recording
-          </button>
+          <div className="flex items-center gap-4">
+            <button onClick={handleStop} className="flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-lg shadow-lg transition-all transform hover:scale-105">
+              <StopIcon />
+              Stop 
+            </button>
+            <button onClick={handleRetry} className="px-6 py-3 bg-transparent border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] rounded-md transition-colors">
+                Retry
+            </button>
+          </div>
         )}
-        <button onClick={onCancel} className="px-6 py-3 bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+        <button onClick={handleCancel} className="px-6 py-3 bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
           Cancel
         </button>
       </div>
