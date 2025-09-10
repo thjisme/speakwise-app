@@ -1,7 +1,0 @@
-{
-  "name": "SpeakWise AI: Speaking Analysis",
-  "description": "An AI-powered speaking coach that provides word-by-word feedback on your pronunciation, accuracy, and stress. Record your voice or upload an audio file to get instant analysis and improve your public speaking skills.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
-}
