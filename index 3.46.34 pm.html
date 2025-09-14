@@ -50,31 +50,6 @@
       ::-webkit-scrollbar-thumb:hover {
         background: var(--text-muted);
       }
-
-      @media print {
-        body {
-            background: white !important;
-        }
-        body * {
-            visibility: hidden;
-        }
-        .analysis-result-container, .analysis-result-container * {
-            visibility: visible;
-        }
-        .print-hide {
-            visibility: hidden !important;
-        }
-        .analysis-result-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            margin: 0;
-            padding: 1rem;
-            box-shadow: none !important;
-            border: none !important;
-        }
-      }
     </style>
   <script type="importmap">
 {

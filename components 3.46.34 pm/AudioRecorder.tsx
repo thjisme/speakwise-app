@@ -4,14 +4,13 @@ import { MicIcon } from './icons/MicIcon.tsx';
 import { StopIcon } from './icons/StopIcon.tsx';
 
 interface AudioRecorderProps {
-  script: string;
   onRecordingComplete: (audioData: { data: string; mimeType: string }) => void;
   onCancel: () => void;
 }
 
 const MAX_DURATION_SECONDS = 300; // 5 minutes
 
-export const AudioRecorder: React.FC<AudioRecorderProps> = ({ script, onRecordingComplete, onCancel }) => {
+export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordingComplete, onCancel }) => {
   const { status, error, startRecording, stopRecording, cancelRecording } = useAudioRecorder();
   const [duration, setDuration] = useState(0);
   const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
@@ -82,14 +81,6 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ script, onRecordin
       <h2 className="text-2xl font-bold text-[var(--text-primary)]">
         {status === 'recording' ? 'Recording...' : 'Ready to Record'}
       </h2>
-
-      <div className="w-full text-left">
-          <h3 className="text-lg font-semibold text-[var(--text-secondary)] mb-2">Your Script to Read:</h3>
-          <div className="max-h-28 overflow-y-auto p-3 bg-[var(--bg-tertiary)] rounded-lg text-[var(--text-secondary)] text-sm">
-              <p className="whitespace-pre-wrap">{script}</p>
-          </div>
-      </div>
-
       <div className="relative w-40 h-40 flex items-center justify-center">
         {status === 'recording' && <div className="absolute inset-0 bg-red-500/30 rounded-full animate-pulse"></div>}
         <div className="relative w-32 h-32 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center">

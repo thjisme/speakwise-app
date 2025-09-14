@@ -52,7 +52,7 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({ words, onGenerateExa
     };
 
     return (
-        <div className="print-hide fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-fade-in">
             <div className="w-full max-w-2xl bg-[var(--bg-secondary)] rounded-lg shadow-2xl p-6 relative max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center pb-4 border-b border-[var(--border-color)]">
                     <h2 className="text-2xl font-bold text-[var(--text-primary)]">Challenging Words Summary</h2>
