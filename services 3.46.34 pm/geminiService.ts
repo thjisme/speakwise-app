@@ -82,7 +82,6 @@ Analysis requirements:
         systemInstruction,
         responseMimeType: "application/json",
         responseSchema: analysisSchema,
-        seed: 42,
       },
     });
 
