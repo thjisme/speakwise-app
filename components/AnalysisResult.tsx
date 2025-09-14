@@ -6,6 +6,7 @@ import { PauseIcon } from './icons/PauseIcon.tsx';
 import { StopIcon } from './icons/StopIcon.tsx';
 import { SpeakerIcon } from './icons/SpeakerIcon.tsx';
 import { SummaryModal } from './SummaryModal.tsx';
+import { DownloadIcon } from './icons/DownloadIcon.tsx';
 
 interface AnalysisResultProps {
   result: AnalysisReport;
@@ -62,6 +63,30 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
   const handlePlayPause = () => (isPlaying ? (isPaused ? resume() : pause()) : play(fullScript));
   const changeRate = (delta: number) => setRate(rate + delta);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = audioURL;
+    
+    const mimeTypeMatch = audioURL.match(/data:(.*);base64,/);
+    const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'audio/webm';
+    
+    let extension = 'audio';
+    if (mimeType.includes('webm')) {
+      extension = 'webm';
+    } else if (mimeType.includes('mpeg') || mimeType.includes('mp3')) {
+      extension = 'mp3';
+    }
+    
+    link.download = `speakwise_recording.${extension}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
     {showSummary && (
@@ -71,7 +96,7 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
             onClose={() => setShowSummary(false)} 
         />
     )}
-    <div className="w-full max-w-5xl p-4 sm:p-6 bg-[var(--bg-secondary)] rounded-2xl shadow-2xl space-y-6">
+    <div className="analysis-result-container w-full max-w-5xl p-4 sm:p-6 bg-[var(--bg-secondary)] rounded-2xl shadow-2xl space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-[var(--border-color)]">
         <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-3 sm:mb-0">Analysis Report</h2>
         <div className="flex items-center gap-6">
@@ -89,8 +114,17 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
       {/* Audio & Transcription */}
       <div className="space-y-4">
         <div>
-            <h3 className="text-lg font-semibold text-[var(--text-secondary)] mb-2">Your Recording</h3>
-            <audio controls src={audioURL} className="w-full" />
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-semibold text-[var(--text-secondary)]">Your Recording</h3>
+              <button 
+                  onClick={handleDownload}
+                  className="print-hide flex items-center gap-2 px-3 py-1 text-sm bg-transparent border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] rounded-md transition-colors"
+              >
+                  <DownloadIcon className="w-4 h-4" />
+                  Download Audio
+              </button>
+            </div>
+            <audio controls src={audioURL} className="w-full print-hide" />
         </div>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -118,7 +152,7 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
         </div>
         <div>
             <h3 className="text-xl font-semibold text-[var(--text-secondary)] mb-2">Natural Speaker Model</h3>
-            <div className="flex items-center gap-2 p-2 bg-[var(--bg-tertiary)] rounded-lg">
+            <div className="print-hide flex items-center gap-2 p-2 bg-[var(--bg-tertiary)] rounded-lg">
                 <button onClick={handlePlayPause} className="p-2 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] rounded-full text-white transition-colors">{isPlaying && !isPaused ? <PauseIcon className="w-5 h-5"/> : <PlayIcon className="w-5 h-5"/>}</button>
                 <button onClick={stop} disabled={!isPlaying} className="p-2 bg-gray-600 hover:bg-gray-500 rounded-full text-white transition-colors disabled:opacity-50"><StopIcon className="w-5 h-5"/></button>
                 <button onClick={() => changeRate(-0.25)} className="px-3 py-1 text-sm bg-[var(--bg-primary)] hover:opacity-80 rounded-md">Slower</button>
@@ -136,9 +170,9 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
           {result.word_by_word_feedback.map((wordData, index) => (
             <div key={`${wordData.word}-${index}`} className="relative group flex items-center gap-1 cursor-pointer">
               <span className={`px-2 py-1 rounded-md border ${getAccuracyClasses(wordData.accuracy, theme)} transition-colors`}>{wordData.word}</span>
-              <button onClick={() => speakWord(wordData.word)} className="text-[var(--text-muted)] hover:text-[var(--accent-color)] transition-colors opacity-0 group-hover:opacity-100"><SpeakerIcon className="w-5 h-5" /></button>
+              <button onClick={() => speakWord(wordData.word)} className="print-hide text-[var(--text-muted)] hover:text-[var(--accent-color)] transition-colors opacity-0 group-hover:opacity-100"><SpeakerIcon className="w-5 h-5" /></button>
 
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-gray-900 text-white border border-gray-700 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+              <div className="print-hide absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-gray-900 text-white border border-gray-700 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
                 <p><strong className="text-gray-400">Feedback:</strong> <span className="text-gray-300">{wordData.pronunciation_feedback}</span></p>
                 <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-900 border-b border-r border-gray-700 transform rotate-45"></div>
               </div>
@@ -148,7 +182,7 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
       </div>
       
       {/* Action Buttons */}
-       <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4 border-t border-[var(--border-color)]">
+       <div className="print-hide flex flex-col sm:flex-row justify-center items-center gap-4 pt-4 border-t border-[var(--border-color)]">
           {challengingWords.length > 0 && (
               <button
                 onClick={() => setShowSummary(true)}
@@ -157,6 +191,12 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
                 Summarize Challenging Words ({challengingWords.length})
               </button>
           )}
+        <button
+          onClick={handlePrint}
+          className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md transition-colors"
+        >
+          Copy of your results
+        </button>
         <button
           onClick={onReset}
           className="px-8 py-3 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-semibold rounded-lg shadow-md transition-colors"
