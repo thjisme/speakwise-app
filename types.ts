@@ -3,6 +3,8 @@ export interface WordFeedback {
   accuracy: 'Excellent' | 'Good' | 'Fair' | 'Poor';
   stress: 'Correct' | 'Incorrect' | 'N/A';
   pronunciation_feedback: string;
+  expected_ipa?: string;
+  user_ipa_approximation?: string;
 }
 
 export interface AnalysisReport {

@@ -17,6 +17,59 @@ interface AnalysisResultProps {
   theme: 'light' | 'dark';
 }
 
+/**
+ * Calculates the Levenshtein distance between two strings, which measures the number of
+ * single-character edits (insertions, deletions, substitutions) required to change
+ * one string into the other.
+ */
+const calculateLevenshteinDistance = (a: string, b: string): number => {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+
+  const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+
+  for (let i = 0; i <= a.length; i++) {
+    matrix[0][i] = i;
+  }
+
+  for (let j = 0; j <= b.length; j++) {
+    matrix[j][0] = j;
+  }
+
+  for (let j = 1; j <= b.length; j++) {
+    for (let i = 1; i <= a.length; i++) {
+      const substitutionCost = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[j][i] = Math.min(
+        matrix[j][i - 1] + 1, // deletion
+        matrix[j - 1][i] + 1, // insertion
+        matrix[j - 1][i - 1] + substitutionCost // substitution
+      );
+    }
+  }
+
+  return matrix[b.length][a.length];
+};
+
+/**
+ * Calculates the similarity between two strings as a percentage based on
+ * the Levenshtein distance.
+ */
+const calculateTextSimilarity = (a: string, b: string): number => {
+    const cleanA = a.trim().toLowerCase();
+    const cleanB = b.trim().toLowerCase();
+    const maxLength = Math.max(cleanA.length, cleanB.length);
+
+    if (maxLength === 0) {
+        return 100;
+    }
+
+    const distance = calculateLevenshteinDistance(cleanA, cleanB);
+    const similarity = (maxLength - distance) / maxLength;
+    
+    return Math.max(0, Math.round(similarity * 100));
+};
+
+
 const getAccuracyClasses = (accuracy: WordFeedback['accuracy'], theme: 'light' | 'dark') => {
   if (theme === 'light') {
     switch (accuracy) {
@@ -54,6 +107,10 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
     const maxScore = result.word_by_word_feedback.length * 4;
     return maxScore > 0 ? ((totalScore / maxScore) * 100).toFixed(0) : 0;
   }, [result.word_by_word_feedback]);
+
+  const transcriptionSimilarity = useMemo(() => {
+    return calculateTextSimilarity(script, result.transcription);
+  }, [script, result.transcription]);
   
   const challengingWords = useMemo(() => 
     result.word_by_word_feedback.filter(w => w.accuracy === 'Fair' || w.accuracy === 'Poor'),
@@ -99,7 +156,7 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
     <div className="analysis-result-container w-full max-w-5xl p-4 sm:p-6 bg-[var(--bg-secondary)] rounded-2xl shadow-2xl space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-[var(--border-color)]">
         <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-3 sm:mb-0">Analysis Report</h2>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 sm:gap-6 flex-wrap justify-center">
             <div className="text-center">
                 <div className="flex justify-center">{[...Array(5)].map((_, i) => <FluencyStar key={i} filled={i < result.fluency_score} />)}</div>
                 <div className="text-sm text-[var(--text-muted)] mt-1">Overall Fluency</div>
@@ -107,6 +164,10 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
             <div className="text-center">
                 <div className="text-4xl font-bold text-indigo-400">{overallAccuracy}%</div>
                 <div className="text-sm text-[var(--text-muted)]">Pronunciation Accuracy</div>
+            </div>
+            <div className="text-center">
+                <div className="text-4xl font-bold text-cyan-400">{transcriptionSimilarity}%</div>
+                <div className="text-sm text-[var(--text-muted)]">Transcription Match</div>
             </div>
         </div>
       </div>
@@ -173,7 +234,25 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, audioURL
               <button onClick={() => speakWord(wordData.word)} className="print-hide text-[var(--text-muted)] hover:text-[var(--accent-color)] transition-colors opacity-0 group-hover:opacity-100"><SpeakerIcon className="w-5 h-5" /></button>
 
               <div className="print-hide absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-gray-900 text-white border border-gray-700 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
-                <p><strong className="text-gray-400">Feedback:</strong> <span className="text-gray-300">{wordData.pronunciation_feedback}</span></p>
+                <div className="space-y-2 text-sm">
+                  <p>
+                    <strong className="font-semibold text-gray-400">Feedback:</strong>
+                    <br />
+                    <span className="text-gray-300">{wordData.pronunciation_feedback}</span>
+                  </p>
+                  {(wordData.expected_ipa || wordData.user_ipa_approximation) && (
+                    <div className="border-t border-gray-600 pt-2">
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">Expected (IPA):</span>
+                            <span className="font-mono text-cyan-300">/{wordData.expected_ipa || 'N/A'}/</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">Yours (IPA):</span>
+                            <span className="font-mono text-amber-300">/{wordData.user_ipa_approximation || 'N/A'}/</span>
+                        </div>
+                    </div>
+                  )}
+                </div>
                 <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-900 border-b border-r border-gray-700 transform rotate-45"></div>
               </div>
             </div>
