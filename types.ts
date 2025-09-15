@@ -18,6 +18,7 @@ export interface AnalysisReport {
 export interface ExampleSentence {
     word: string;
     sentence: string;
+    part_of_speech: string;
 }
 
 export type AppStatus = 'idle' | 'recording' | 'uploading' | 'analyzing' | 'results' | 'error';

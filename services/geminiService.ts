@@ -133,16 +133,17 @@ const exampleSentenceSchema = {
     type: Type.OBJECT,
     properties: {
         word: { type: Type.STRING },
-        sentence: { type: Type.STRING, description: "A simple, clear sentence using the word."}
+        sentence: { type: Type.STRING, description: "A simple, clear sentence using the word."},
+        part_of_speech: { type: Type.STRING, description: "The grammatical part of speech for the word in the context of the sentence (e.g., Noun, Verb, Adjective)." }
     },
-    required: ['word', 'sentence']
+    required: ['word', 'sentence', 'part_of_speech']
 };
 
 export const generateExampleSentences = async (apiKey: string, words: string[]): Promise<ExampleSentence[]> => {
     try {
         const ai = getAIClient(apiKey);
         const model = 'gemini-2.5-flash';
-        const prompt = `For each word in the following list, create a simple and clear example sentence that demonstrates its common usage. Words: ${words.join(', ')}`;
+        const prompt = `For each word in the following list, create a simple and clear example sentence that demonstrates its common usage, and identify its part of speech. Words: ${words.join(', ')}`;
 
         const response = await ai.models.generateContent({
             model,
